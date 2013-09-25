@@ -156,7 +156,7 @@ def ESplot(data, ts='', specfit = '', spts=[], ll=False):
             vl,fl = zip(*spts[1])
             pl.plot(fl,vl,'bo', mfc='none')
             selpts = selvfns(spts[1],vf,fEf)
-            print 'Selected points: {}'.format(', '.join(str(i) for i in selpts))
+            print 'Selected points: {0}\nExplain {1}% of the total variance.'.format(', '.join(str(i) for i in selpts), round(sum(vl)*100.,2))
             if len(selpts) > 20:
                 print 'Warning: More than 20 were selected. Only plotting first 20. You can plot the rest in the next routine.'
                 EOFplot(data, EOFsel=selpts[:20])
@@ -393,8 +393,12 @@ while yorn == 'y':
             if len(v_num) > 2 or len(v_num) < 2:
                 raise Warning("You didn't specify 2 ranks properly. Moving on...")
                 yorn = 'n'
-            else:   PairedPlot(data.E[:][:,v_num[0]],data.E[:][:,v_num[1]], ts='{0} and {1}'.format(*v_num))
-        else:   PairedPlot(data.E[:][:,v_num[0]],data.E[:][:,v_num[1]], ts='{0} and {1}'.format(*v_num))
+            else:
+                print '\nEOF pair, {0}, explain {1}% of the total variance.'.format(v_num, round(sum(data.vp[k] for k in v_num)*100.,2))
+                PairedPlot(data.E[:][:,v_num[0]],data.E[:][:,v_num[1]], ts='{0} and {1}'.format(*v_num))
+        else:
+            print '\nEOF pair, {0}, explain {1}% of the total variance.'.format(v_num, round(sum(data.vp[k] for k in v_num)*100.,2))
+            PairedPlot(data.E[:][:,v_num[0]],data.E[:][:,v_num[1]], ts='{0} and {1}'.format(*v_num))
     yorn = raw_input('Want to plot another pair (y/n)?')
 
 # Reconstruct the signal based on the SSA analysis
@@ -410,7 +414,7 @@ while yorn == 'y' or yorn == 'r':
     data.x_resid = [data.X[i]-data.rx[i] for i in range(data.N)]
     yorn2 = raw_input('Plot original and reconstruction SEPARATELY or TOGETHER (s/t)?')
     if nr == data.M: print '\nPlotted reconstruction for all {} EOFS.'.format(data.M)
-    else:   print '\nPlotted reconstruction for EOFS: {}'.format(', '.join(str(i) for i in r_sel))
+    else:   print '\nThe plotted reconstruction for EOFS: {0}\nExplain {1}% of the total variance.'.format(', '.join(str(i) for i in r_sel), round(sum(data.vp[k] for k in r_sel)*100.,2))
     if yorn2 == 's':
         ReconPlot(data, subp='s')
     else:
