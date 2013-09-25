@@ -83,6 +83,8 @@ def EOFplot(data, EOFsel=[], EOFpages=False, sid=0):
             if data.fEp[sel]:    T = int(1./data.fEp[sel])
             else: T = 1
             pl.title(r'EOF#{0}:$\Delta$T={1}'.format(sel,T)) #EOF#[]: T=dominant period (1/f)
+            locs, labels = pl.xticks()
+            pl.setp(labels, rotation=30)
         figeof.tight_layout()
     else:
         # Compensate for EOF-pages near end of M
@@ -98,6 +100,8 @@ def EOFplot(data, EOFsel=[], EOFpages=False, sid=0):
             if data.fEp[sel]:    T = int(1./data.fEp[sel])
             else: T = 1
             pl.title(r'EOF#{0}:$\Delta$T={1}'.format(sel, T)) #EOF#[]: T=dominant period (1/f)
+            locs, labels = pl.xticks()
+            pl.setp(labels, rotation=30)
         figeof.tight_layout()
         pl.show()
 
