@@ -87,8 +87,8 @@ def EOFplot(data, EOFsel=[], EOFpages=False, sid=0):
         figeof.tight_layout()
     else:
         # Compensate for EOF-pages near end of M
-        if sid+19 > data.M: eid = data.M
-        else: eid = sid+19
+        if sid+20 > data.M: eid = data.M
+        else: eid = sid+20
         ts = 'Ranked Eigenvectors {0}-{1}; (Close to continue...)'.format(sid, eid)
         figeof = pl.figure(); figeof.patch.set_facecolor('white')
         figeof.canvas.set_window_title(ts)
@@ -123,11 +123,19 @@ def ESplot(data, ts='', specfit = '', spts=[], ll=False):
             fig = pl.gcf()
             cid = fig.canvas.mpl_connect('button_press_event', drawline)
             pl.show()
-            xl,yl = zip(*coords)
-            ml = (log(yl[1]/yl[0]))/(xl[1]-xl[0])
-            bl= yl[1]*exp(-ml*xl[1])
-            rejs = rejvfs(ml,bl,vf,fEf)
-            return [rejs, selvfs(rejs,vf,fEf)]
+            if coords:
+                xl,yl = zip(*coords)
+                ml = (log(yl[1]/yl[0]))/(xl[1]-xl[0])
+                bl= yl[1]*exp(-ml*xl[1])
+                rejs = rejvfs(ml,bl,vf,fEf)
+                if len(rejs) < data.M:
+                    return [rejs, selvfs(rejs,vf,fEf)]
+                else:
+                    print "\nOops! You didn't select any points. The first 20 are selected for you."
+                    return [zip(vf[20:],fEf[20:]), zip(vf[:20],fEf[:20])]
+            else:
+                print "\nOops! You didn't select any points. The first 20 are selected for you."
+                return [zip(vf[20:],fEf[20:]), zip(vf[:20],fEf[:20])]
         else:
             def red(X, v, fE):  return v - X[0]/(X[1]+(2.*pi*X[2]*fE)**2)
             def powerlaw(X, v, fE): return v - X[0]*(fE**X[1])
@@ -179,10 +187,10 @@ def ESplot(data, ts='', specfit = '', spts=[], ll=False):
     if specfit == '':   pl.show()
     else:   return plotcis(data.vp,data.fEp,data.M,data.E,specfit,data.N,spts)
 
-def PairedPlot(p1, p2, pptype='EOF ', ts='a and b'):
+def PairedPlot(p1, p2, pptype='EOF', ts='a and b'):
     """ PairedPlot plots a pairs vectors againest one another."""
     fig_pp = pl.figure(1); fig_pp.patch.set_facecolor('white')
-    fig_pp.canvas.set_window_title('Paired {}plot of '.format(pptype)+ts+'; (Close to continue...)')
+    fig_pp.canvas.set_window_title('Paired {0} plot of {1}; (Close to continue...)'.format(pptype, ts))
     pl.plot(p1,p2); ax_pp = pl.gca()
     pl.grid(b=True, which='major', color='0.4', linestyle='--')
     #pl.grid(b=True, which='minor', color='0.4', linestyle=':')
@@ -194,10 +202,10 @@ def PairedPlot(p1, p2, pptype='EOF ', ts='a and b'):
     fig_pp.tight_layout()
     pl.show()
 
-def ReconPlot(data, subp='t', ts = ''):
+def ReconPlot(data, subp='t'):
     """ EOFplot plots selected or pages of eigenvectors."""
     fig_rp = pl.figure(2); fig_rp.patch.set_facecolor('white')
-    fig_rp.canvas.set_window_title('Original and reconstructed time series for {}; (Close to continue...)'.format(ts))
+    fig_rp.canvas.set_window_title('Original and reconstructed time series for {0}; (Close to continue...)'.format(data.filename))
     def glines():
         pl.grid(b=True, which='major', color='0.4', linestyle='--')
         pl.grid(b=True, which='minor', color='0.4', linestyle=':')
@@ -281,7 +289,7 @@ class LBParams(object):
         def run_command():
             rid = L.get(Tk.ACTIVE)
             eval(self.but_command.format(rid))
-            print '\n{0}: "{1}" = {2} successful.'.format(self.title ,self.but_lbl, rid)
+            print '\n{0}: {1} {2} successful.'.format(self.title, self.but_lbl, rid)
         b2 = Tk.Button(F2, text=self.but_lbl, command=run_command)
         b2.pack(side=Tk.LEFT)
         F2.pack(side=Tk.TOP)
@@ -378,7 +386,7 @@ if yorn == 'y':
     idlist = range(data.M)
     print '\n Opening a ListBox selection window. Plot as many EOF pages as you\n  wish, and then close the plots and ListBox to continue.'
     EOF_listbox = LBParams('EOF-Pages', 'Select 1st EOF,\nclick Plot 20.',
-         "EOFplot(data, EOFpages=True, sid=int({0}))", "Plot next 20", idlist)
+         "EOFplot(data, EOFpages=True, sid=int({0}))", "Plot next 20 EOFs beginning with", idlist)
     EOF_listbox.open_lb()
 
 # Now offer to plot two eigenvectors against each other
@@ -409,7 +417,7 @@ while yorn == 'y' or yorn == 'r':
     r_sel = raw_input('Enter the desired EOF-#s (e.g. 1,2,3,4... or blank for selected):')
     if not r_sel:
         if 'sel_EOFs' in dir(data):    r_sel = ','.join(str(i) for i in data.sel_EOFs)
-        else:   r_sel = ','.join(str(i) for i in xrange(0,int(M)))
+        else:   r_sel = ','.join(str(i) for i in xrange(0,int(data.M)))
     r_sel = [int(i) for i in r_sel.split(',')]
     nr = len(r_sel)
     data.rx = [i+data.mean for i in sum(data.R[:][:,r_sel], axis=1)]
@@ -429,6 +437,6 @@ if yorn == 'y':
     var_nms = [i for i in data.__dict__.keys() if i[:1] != '_']
     vname_lb = LBParams('SSA Variables', 'Select variable,\nclick Save.',
          "savetxt(data.fpath.replace('.txt','_{0}.txt'), data.{0}, delimiter=',', newline='\\n')",
-         "Save to csv", var_nms)
+         "Save to csv:", var_nms)
     vname_lb.open_lb()
 print '\nClosing ssa.py.'
