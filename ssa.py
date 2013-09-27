@@ -412,7 +412,7 @@ while yorn == 'y':
     yorn = raw_input('Want to plot another pair (y/n)?')
 
 # Reconstruct the signal based on the SSA analysis
-yorn = raw_input('Want to plot a Reconstructed Time Series (y/n)?')
+yorn = raw_input('Want to plot a reconstructed time series (y/n)?')
 while yorn == 'y' or yorn == 'r':
     r_sel = raw_input('Enter the desired EOF-#s (e.g. 1,2,3,4... or blank for selected):')
     if not r_sel:
@@ -420,19 +420,23 @@ while yorn == 'y' or yorn == 'r':
         else:   r_sel = ','.join(str(i) for i in xrange(0,int(data.M)))
     r_sel = [int(i) for i in r_sel.split(',')]
     nr = len(r_sel)
-    yorn = raw_input('Do you want to scale the reconstruction mean by the explained variance? ([y assumed]/n)?')
-    if yorn == 'n': scaled_mean = data.mean
-    else:   scaled_mean = data.mean*sum(data.vp[r_sel])
-    data.rx = [i+scaled_mean for i in sum(data.R[:][:,r_sel], axis=1)]
-    data.x_resid = [data.X[i]-data.rx[i] for i in range(data.N)]
-    yorn2 = raw_input('Plot original and reconstruction SEPARATELY or TOGETHER (s/t)?')
+    yorn2 = raw_input('Do you want to scale the reconstruction mean by the explained variance? ([y assumed]/n)?')
+    scaled_mean = data.mean if yorn2 == 'n' else data.mean*sum(data.vp[r_sel])
+    yorn2 = raw_input('Plot the original against the RESIDUAL or the RECONSTRUCTION? (rs, [rc assumed])')
+    if yorn2 == 'rs':
+        data.x_resid = [i+scaled_mean for i in sum(data.R[:][:,r_sel], axis=1)]
+        data.rx = [data.X[i]-data.x_resid[i] for i in range(data.N)]
+    else:
+        yorn2 = raw_input('Plot original and reconstruction SEPARATELY or TOGETHER (s/[t assumed])?')
+        data.rx = [i+scaled_mean for i in sum(data.R[:][:,r_sel], axis=1)]
+        data.x_resid = [data.X[i]-data.rx[i] for i in range(data.N)]
     if nr == data.M: print '\nPlotted reconstruction for all {} EOFS.'.format(data.M)
     else:   print '\nThe plotted reconstruction for EOFS: {0}\nExplain {1}% of the total variance.'.format(', '.join(str(i) for i in r_sel), round(sum(data.vp[k] for k in r_sel)*100.,2))
     if yorn2 == 's':
         ReconPlot(data, subp='s')
     else:
         ReconPlot(data, subp='t')
-    yorn = raw_input(' Would you like to consider a different reconstruction (y/n)?')
+    yorn = raw_input(' Would you like to consider a different reconstruction (y/[n assumed])?')
 
 yorn = raw_input('Would you like to save any SSA data to disk (y/n)?')
 if yorn == 'y':
