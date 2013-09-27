@@ -420,7 +420,10 @@ while yorn == 'y' or yorn == 'r':
         else:   r_sel = ','.join(str(i) for i in xrange(0,int(data.M)))
     r_sel = [int(i) for i in r_sel.split(',')]
     nr = len(r_sel)
-    data.rx = [i+data.mean for i in sum(data.R[:][:,r_sel], axis=1)]
+    yorn = raw_input('Do you want to scale the reconstruction mean by the explained variance? ([y assumed]/n)?')
+    if yorn == 'n': scaled_mean = data.mean
+    else:   scaled_mean = data.mean*sum(data.vp[r_sel])
+    data.rx = [i+scaled_mean for i in sum(data.R[:][:,r_sel], axis=1)]
     data.x_resid = [data.X[i]-data.rx[i] for i in range(data.N)]
     yorn2 = raw_input('Plot original and reconstruction SEPARATELY or TOGETHER (s/t)?')
     if nr == data.M: print '\nPlotted reconstruction for all {} EOFS.'.format(data.M)
