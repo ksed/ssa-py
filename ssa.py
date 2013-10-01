@@ -12,6 +12,7 @@
 #                 provided in each function's doc-string.
 # Pythonista:   KSedmera
 # Version:      2013/09, Python 2.7.5
+# License:      GPLv3 (see COPYING txt file)
 # Citation:     Eric Breitenberger (eric@gi.alaska.edu) for root ssa functions
 #               Karsten Sedmera (70yxofzlivi74vhc@mailcatch.com) for ssa.py
 #-------------------------------------------------------------------------------
