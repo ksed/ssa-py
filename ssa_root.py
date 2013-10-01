@@ -7,6 +7,7 @@
 #                 translated function are provided in each function's
 #                 doc-string.
 # Pythonista:   KSedmera
+# License:      GPLv3 (see COPYING txt file)
 # Version:      2013/09
 #-------------------------------------------------------------------------------
 import os, sys, time, math
